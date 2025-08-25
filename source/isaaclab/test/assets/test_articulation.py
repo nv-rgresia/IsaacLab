@@ -38,7 +38,25 @@ from isaaclab.assets import Articulation, ArticulationCfg
 from isaaclab.cloner.grid_cloner import GridCloner
 from isaaclab.sim import build_simulation_context
 from isaaclab.sim._impl.newton_manager import NewtonManager
+from isaaclab.sim._impl.newton_manager_cfg import NewtonCfg
+from isaaclab.sim._impl.solvers_cfg import MJWarpSolverCfg
+from isaaclab.sim.simulation_cfg import SimulationCfg
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
+
+SOLVER_CFGs = {
+    "anymal": SimulationCfg(
+        dt=0.005,
+        newton_cfg=NewtonCfg(
+            solver_cfg=MJWarpSolverCfg(
+                nefc_per_env=80,
+                ls_parallel=True,
+                ls_iterations=20,
+                cone="elliptic",
+                impratio=100,
+            )
+        ),
+    ),
+}
 
 
 def generate_articulation_cfg(
@@ -206,8 +224,16 @@ def sim(request):
         add_ground_plane = request.getfixturevalue("add_ground_plane")
     else:
         add_ground_plane = False  # default to no ground plane
+    if "sim_cfg" in request.fixturenames:
+        cfg: SimulationCfg = request.getfixturevalue("sim_cfg")
+    else:
+        cfg = None
     with build_simulation_context(
-        device=device, auto_add_lighting=True, gravity_enabled=gravity_enabled, add_ground_plane=add_ground_plane
+        device=device,
+        auto_add_lighting=True,
+        gravity_enabled=gravity_enabled,
+        add_ground_plane=add_ground_plane,
+        sim_cfg=cfg,
     ) as sim:
         sim._app_control_on_stop_handle = None
         yield sim
@@ -714,7 +740,8 @@ def test_external_force_buffer(sim, num_articulations, device):
 @pytest.mark.parametrize("num_articulations", [1, 2])
 @pytest.mark.parametrize("device", ["cuda:0"])
 @pytest.mark.parametrize("add_ground_plane", [True])
-def test_external_force_on_single_body(sim, num_articulations, device, add_ground_plane):
+@pytest.mark.parametrize("sim_cfg", [SOLVER_CFGs["anymal"]])
+def test_external_force_on_single_body(sim, num_articulations, device, add_ground_plane, sim_cfg):
     """Test application of external force on the base of the articulation.
 
     This test verifies that:
@@ -741,6 +768,7 @@ def test_external_force_on_single_body(sim, num_articulations, device, add_groun
     for _ in range(5):
         # reset root state
         root_state = articulation.data.default_root_state.clone()
+        print("root_state", root_state)
         articulation.write_root_pose_to_sim(root_state[:, :7])
         articulation.write_root_velocity_to_sim(root_state[:, 7:])
         # reset dof state
@@ -764,6 +792,7 @@ def test_external_force_on_single_body(sim, num_articulations, device, add_groun
             sim.step()
             # update buffers
             articulation.update(sim.cfg.dt)
+            print("root_pos_w", articulation.data.root_pos_w[:, 1])
         # check condition that the articulations have fallen down
         for i in range(num_articulations):
             assert articulation.data.root_pos_w[i, 1].item() > 1.5
@@ -772,7 +801,8 @@ def test_external_force_on_single_body(sim, num_articulations, device, add_groun
 @pytest.mark.parametrize("num_articulations", [1, 2])
 @pytest.mark.parametrize("device", ["cuda:0"])
 @pytest.mark.parametrize("add_ground_plane", [False])
-def test_external_force_on_multiple_bodies(sim, num_articulations, device, add_ground_plane):
+@pytest.mark.parametrize("sim_cfg", [SOLVER_CFGs["anymal"]])
+def test_external_force_on_multiple_bodies(sim, num_articulations, device, add_ground_plane, sim_cfg):
     """Test application of external force on the legs of the articulation.
 
     This test verifies that:

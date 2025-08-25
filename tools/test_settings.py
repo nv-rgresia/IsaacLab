@@ -22,6 +22,7 @@ PER_TEST_TIMEOUTS = {
     "test_environment_determinism.py": 500,  # This test runs through many the environments for 100 steps each
     "test_factory_environments.py": 300,  # This test runs through Factory environments for 100 steps each
     "test_env_rendering_logic.py": 300,
+    "test_solver_convergence.py": 1000,
     "test_multi_tiled_camera": 300,
     "test_generate_dataset.py": 500,  # This test runs annotation for 10 demos and generation until one succeeds
     "test_operational_space.py": 300,
