@@ -26,7 +26,7 @@ from isaaclab.actuators.actuator_cfg import ImplicitActuatorCfg
 
 CAPSULES_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=f"/home/rgresia/Repositories/sim-tested-hands/physx-finger.usd",
+        usd_path=f"/home/rgresia/Repositories/sim-tested-hands/capsules.usd",
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
         ),

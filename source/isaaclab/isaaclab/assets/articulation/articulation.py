@@ -132,7 +132,7 @@ class Articulation(AssetBase):
     @property
     def num_spatial_tendons(self) -> int:
         """Number of spatial tendons in articulation."""
-        return 0
+        return self._root_newton_view.spatial_tendon_count
 
     @property
     def num_bodies(self) -> int:
@@ -1201,7 +1201,20 @@ class Articulation(AssetBase):
             fixed_tendon_ids: The tendon indices to set the offset for. Defaults to None (all fixed tendons).
             env_ids: The environment indices to set the offset for. Defaults to None (all environments).
         """
-        raise NotImplementedError("Fixed tendon offset is not supported in Newton.")
+        if int(get_version()[2]) < 5:
+            omni.log.warn(
+                "Spatial tendons are not supported in Isaac Sim < 5.0. Please update to Isaac Sim 5.0 or later."
+            )
+            return
+            # resolve indices
+        if env_ids is None:
+            env_ids = slice(None)
+        if spatial_tendon_ids is None:
+            spatial_tendon_ids = slice(None)
+        if env_ids != slice(None) and spatial_tendon_ids != slice(None):
+            env_ids = env_ids[:, None]
+            # set offset
+        self._data.spatial_tendon_offset[env_ids, spatial_tendon_ids] = offset
 
     def write_fixed_tendon_properties_to_sim(
         self,
@@ -1286,7 +1299,15 @@ class Articulation(AssetBase):
             spatial_tendon_ids: The tendon indices to set the offset for. Defaults to None (all spatial tendons).
             env_ids: The environment indices to set the offset for. Defaults to None (all environments).
         """
-        raise NotImplementedError("Spatial tendon offset is not supported in Newton.")
+
+        if env_ids is None:
+            env_ids = slice(None)
+        if spatial_tendon_ids is None:
+            spatial_tendon_ids = slice(None)
+        if env_ids != slice(None) and spatial_tendon_ids != slice(None):
+            env_ids = env_ids[:, None]
+            # set offset
+        self._data.spatial_tendon_offset[env_ids, spatial_tendon_ids] = offset
 
     def write_spatial_tendon_properties_to_sim(
         self,
@@ -1299,7 +1320,21 @@ class Articulation(AssetBase):
             spatial_tendon_ids: The spatial tendon indices to set the properties for. Defaults to None (all spatial tendons).
             env_ids: The environment indices to set the properties for. Defaults to None (all environments).
         """
-        raise NotImplementedError("Spatial tendon properties are not supported in Newton.")
+        # resolve indices
+        physx_env_ids = env_ids
+        if env_ids is None:
+            physx_env_ids = self._ALL_INDICES
+        if spatial_tendon_ids is None:
+            spatial_tendon_ids = slice(None)
+
+        # set into simulation
+        self.root_newton_view.set_spatial_tendon_properties(
+            self._data.spatial_tendon_stiffness,
+            self._data.spatial_tendon_damping,
+            self._data.spatial_tendon_limit_stiffness,
+            self._data.spatial_tendon_offset,
+            indices=physx_env_ids,
+        )
 
     """
     Internal helper.
@@ -1727,8 +1762,8 @@ class Articulation(AssetBase):
         if self.num_fixed_tendons > 0:
             raise NotImplementedError("Tendons are not implemented yet")
 
-        if self.num_spatial_tendons > 0:
-            raise NotImplementedError("Tendons are not implemented yet")
+        # if self.num_spatial_tendons > 0:
+        #     raise NotImplementedError("Tendons are not implemented yet")
 
     """
     Deprecated methods.

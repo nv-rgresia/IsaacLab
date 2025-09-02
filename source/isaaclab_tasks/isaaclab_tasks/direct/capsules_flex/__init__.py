@@ -14,7 +14,7 @@ from . import agents
 
 gym.register(
     id="Isaac-Capsules-Flex-Direct-v0",
-    entry_point=f"{__name__}.finger_flex_env:CapsulesFlexEnv",
+    entry_point=f"{__name__}.capsules_flex_env:CapsulesFlexEnv",
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": f"{__name__}.capsules_flex_env_cfg:CapsulesFlexEnvCfg",

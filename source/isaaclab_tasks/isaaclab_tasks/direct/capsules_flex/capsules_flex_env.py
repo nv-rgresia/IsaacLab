@@ -12,7 +12,7 @@ import torch
 from collections.abc import Sequence
 
 import isaaclab.sim as sim_utils
-from isaaclab.assets import Articulation, RigidObject
+from isaaclab.assets import Articulation #, RigidObject
 from isaaclab.envs import DirectRLEnv
 from isaaclab.sim.spawners.from_files import GroundPlaneCfg, spawn_ground_plane
 from isaaclab.utils.math import sample_uniform
@@ -32,7 +32,7 @@ class CapsulesFlexEnv(DirectRLEnv):
 
     def _setup_scene(self):
         self.robot = Articulation(self.cfg.robot_cfg)
-        self.object = RigidObject(self.cfg.object_cfg)
+        # self.object = RigidObject(self.cfg.object_cfg)
         # add ground plane
         spawn_ground_plane(prim_path="/World/ground", cfg=GroundPlaneCfg())
         # clone and replicate

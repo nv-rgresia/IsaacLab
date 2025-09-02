@@ -5,7 +5,7 @@
 
 from isaaclab_assets.robots.capsules import CAPSULES_CFG
 import isaaclab.sim as sim_utils
-from isaaclab.assets import ArticulationCfg,  RigidObjectCfg
+from isaaclab.assets import ArticulationCfg #, RigidObjectCfg
 from isaaclab.envs import DirectRLEnvCfg
 from isaaclab.scene import InteractiveSceneCfg
 from isaaclab.sim import SimulationCfg
@@ -32,23 +32,23 @@ class CapsulesFlexEnvCfg(DirectRLEnvCfg):
 
     # robot(s)
     robot_cfg: ArticulationCfg = CAPSULES_CFG.replace(prim_path="/World/envs/env_.*/Robot")
-    object_cfg: RigidObjectCfg = RigidObjectCfg(
-        prim_path="/World/envs/env_.*/object",
-        spawn=sim_utils.UsdFileCfg(
-            usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-            rigid_props=sim_utils.RigidBodyPropertiesCfg(
-                kinematic_enabled=False,
-                disable_gravity=False,
-                enable_gyroscopic_forces=True,
-                solver_position_iteration_count=8,
-                solver_velocity_iteration_count=0,
-                sleep_threshold=0.005,
-                stabilization_threshold=0.0025,
-                max_depenetration_velocity=1000.0,
-            ),
-            mass_props=sim_utils.MassPropertiesCfg(density=567.0),
-        ),
-        init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, -0.39, 0.6), rot=(1.0, 0.0, 0.0, 0.0)),
-    )
+    # object_cfg: RigidObjectCfg = RigidObjectCfg(
+    #     prim_path="/World/envs/env_.*/object",
+    #     spawn=sim_utils.UsdFileCfg(
+    #         usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
+    #         rigid_props=sim_utils.RigidBodyPropertiesCfg(
+    #             kinematic_enabled=False,
+    #             disable_gravity=False,
+    #             enable_gyroscopic_forces=True,
+    #             solver_position_iteration_count=8,
+    #             solver_velocity_iteration_count=0,
+    #             sleep_threshold=0.005,
+    #             stabilization_threshold=0.0025,
+    #             max_depenetration_velocity=1000.0,
+    #         ),
+    #         mass_props=sim_utils.MassPropertiesCfg(density=567.0),
+    #     ),
+    #     init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, -0.39, 0.6), rot=(1.0, 0.0, 0.0, 0.0)),
+    # )
     # scene
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=4.0, replicate_physics=True)
