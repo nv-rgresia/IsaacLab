@@ -154,7 +154,7 @@ class Articulation(AssetBase):
     def spatial_tendon_names(self) -> list[str]:
         """Ordered names of spatial tendons in articulation."""
         # TODO: check if the articulation has spatial tendons
-        return []
+        return self._root_newton_view.tendon_names
 
     @property
     def body_names(self) -> list[str]:
@@ -1201,20 +1201,16 @@ class Articulation(AssetBase):
             fixed_tendon_ids: The tendon indices to set the offset for. Defaults to None (all fixed tendons).
             env_ids: The environment indices to set the offset for. Defaults to None (all environments).
         """
-        if int(get_version()[2]) < 5:
-            omni.log.warn(
-                "Spatial tendons are not supported in Isaac Sim < 5.0. Please update to Isaac Sim 5.0 or later."
-            )
-            return
-            # resolve indices
+        raise NotImplementedError("Fixed tendon offset is not supported in Newton.")
+        # resolve indices
         if env_ids is None:
             env_ids = slice(None)
-        if spatial_tendon_ids is None:
-            spatial_tendon_ids = slice(None)
-        if env_ids != slice(None) and spatial_tendon_ids != slice(None):
+        if fixed_tendon_ids is None:
+            fixed_tendon_ids = slice(None)
+        if env_ids != slice(None) and fixed_tendon_ids != slice(None):
             env_ids = env_ids[:, None]
-            # set offset
-        self._data.spatial_tendon_offset[env_ids, spatial_tendon_ids] = offset
+        # set offset
+        self._data.fixed_tendon_offset[env_ids, fixed_tendon_ids] = offset
 
     def write_fixed_tendon_properties_to_sim(
         self,
@@ -1245,7 +1241,15 @@ class Articulation(AssetBase):
             spatial_tendon_ids: The tendon indices to set the stiffness for. Defaults to None (all spatial tendons).
             env_ids: The environment indices to set the stiffness for. Defaults to None (all environments).
         """
-        raise NotImplementedError("Spatial tendon stiffness is not supported in Newton.")
+        # resolve indices
+        if env_ids is None:
+            env_ids = slice(None)
+        if spatial_tendon_ids is None:
+            spatial_tendon_ids = slice(None)
+        if env_ids != slice(None) and spatial_tendon_ids != slice(None):
+            env_ids = env_ids[:, None]
+        # set stiffness
+        self._data.spatial_tendon_stiffness[env_ids, spatial_tendon_ids] = stiffness
 
     def set_spatial_tendon_damping(
         self,
@@ -1263,7 +1267,15 @@ class Articulation(AssetBase):
             spatial_tendon_ids: The tendon indices to set the damping for. Defaults to None (all spatial tendons).
             env_ids: The environment indices to set the damping for. Defaults to None (all environments).
         """
-        raise NotImplementedError("Spatial tendon damping is not supported in Newton.")
+        # resolve indices
+        if env_ids is None:
+            env_ids = slice(None)
+        if spatial_tendon_ids is None:
+            spatial_tendon_ids = slice(None)
+        if env_ids != slice(None) and spatial_tendon_ids != slice(None):
+            env_ids = env_ids[:, None]
+        # set damping
+        self._data.spatial_tendon_damping[env_ids, spatial_tendon_ids] = damping
 
     def set_spatial_tendon_limit_stiffness(
         self,
@@ -1281,7 +1293,15 @@ class Articulation(AssetBase):
             spatial_tendon_ids: The tendon indices to set the limit stiffness for. Defaults to None (all spatial tendons).
             env_ids: The environment indices to set the limit stiffness for. Defaults to None (all environments).
         """
-        raise NotImplementedError("Spatial tendon limit stiffness is not supported in Newton.")
+        # resolve indices
+        if env_ids is None:
+            env_ids = slice(None)
+        if spatial_tendon_ids is None:
+            spatial_tendon_ids = slice(None)
+        if env_ids != slice(None) and spatial_tendon_ids != slice(None):
+            env_ids = env_ids[:, None]
+        # set limit stiffness
+        self._data.spatial_tendon_limit_stiffness[env_ids, spatial_tendon_ids] = limit_stiffness
 
     def set_spatial_tendon_offset(
         self,
@@ -1299,14 +1319,14 @@ class Articulation(AssetBase):
             spatial_tendon_ids: The tendon indices to set the offset for. Defaults to None (all spatial tendons).
             env_ids: The environment indices to set the offset for. Defaults to None (all environments).
         """
-
+        # resolve indices
         if env_ids is None:
             env_ids = slice(None)
         if spatial_tendon_ids is None:
             spatial_tendon_ids = slice(None)
         if env_ids != slice(None) and spatial_tendon_ids != slice(None):
             env_ids = env_ids[:, None]
-            # set offset
+        # set offset
         self._data.spatial_tendon_offset[env_ids, spatial_tendon_ids] = offset
 
     def write_spatial_tendon_properties_to_sim(
@@ -1329,11 +1349,12 @@ class Articulation(AssetBase):
 
         # set into simulation
         self.root_newton_view.set_spatial_tendon_properties(
+            NewtonManager.get_control(),
             self._data.spatial_tendon_stiffness,
             self._data.spatial_tendon_damping,
             self._data.spatial_tendon_limit_stiffness,
             self._data.spatial_tendon_offset,
-            indices=physx_env_ids,
+            mask=physx_env_ids,
         )
 
     """
@@ -1631,10 +1652,56 @@ class Articulation(AssetBase):
         """Process fixed and spatialtendons."""
         # create a list to store the fixed tendon names
         self._fixed_tendon_names = list()
-        self._spatial_tendon_names = list()
+        self._spatial_tendon_names = self._root_newton_view.tendon_names
         # parse fixed tendons properties if they exist
-        if self.num_fixed_tendons > 0:
-            raise NotImplementedError("Tendons are not implemented yet")
+        if self.num_fixed_tendons > 0 or self.num_spatial_tendons > 0:
+        #    stage = stage_utils.get_current_stage()
+        #    joint_paths = self.root_physx_view.dof_paths[0]
+
+        #    # iterate over all joints to find tendons attached to them
+        #    for j in range(self.num_joints):
+        #        usd_joint_path = joint_paths[j]
+        #        # check whether joint has tendons - tendon name follows the joint name it is attached to
+        #        joint = UsdPhysics.Joint.Get(self.stage, usd_joint_path)
+        #        if joint.GetPrim().HasAPI(PhysxSchema.PhysxTendonAxisRootAPI):
+        #            joint_name = usd_joint_path.split("/")[-1]
+        #            self._fixed_tendon_names.append(joint_name)
+        #        elif joint.GetPrim().HasAPI(PhysxSchema.PhysxTendonAttachmentRootAPI) or joint.GetPrim().HasAPI(
+        #            PhysxSchema.PhysxTendonAttachmentLeafAPI
+        #        ):
+        #            joint_name = usd_joint_path.split("/")[-1]
+        #            self._spatial_tendon_names.append(joint_name)
+
+        #    # store the fixed tendon names
+        #    self._data.fixed_tendon_names = self._fixed_tendon_names
+           self._data.spatial_tendon_names = self._root_newton_view.tendon_names
+        #    # store the current USD fixed tendon properties
+        #    self._data.default_fixed_tendon_stiffness = self.root_physx_view.get_fixed_tendon_stiffnesses().clone()
+        #    self._data.default_fixed_tendon_damping = self.root_physx_view.get_fixed_tendon_dampings().clone()
+        #    self._data.default_fixed_tendon_limit_stiffness = (
+        #        self.root_physx_view.get_fixed_tendon_limit_stiffnesses().clone()
+        #    )
+        #    self._data.default_fixed_tendon_pos_limits = self.root_physx_view.get_fixed_tendon_limits().clone()
+        #    self._data.default_fixed_tendon_rest_length = self.root_physx_view.get_fixed_tendon_rest_lengths().clone()
+        #    self._data.default_fixed_tendon_offset = self.root_physx_view.get_fixed_tendon_offsets().clone()
+        #    self._data.default_spatial_tendon_stiffness = self.root_newton_view.get_spatial_tendon_stiffnesses().clone()
+        #    self._data.default_spatial_tendon_damping = self.root_newton_view.get_spatial_tendon_dampings().clone()
+           # self._data.default_spatial_tendon_limit_stiffness = (
+           #     self.root_newton_view.get_spatial_tendon_limit_stiffnesses().clone()
+           # )
+           self._data.default_spatial_tendon_offset = wp.to_torch(self.root_newton_view.get_spatial_tendon_offsets(NewtonManager.get_control())).clone()
+
+        #    # store a copy of the default values for the fixed tendons
+        #    self._data.fixed_tendon_stiffness = self._data.default_fixed_tendon_stiffness.clone()
+        #    self._data.fixed_tendon_damping = self._data.default_fixed_tendon_damping.clone()
+        #    self._data.fixed_tendon_limit_stiffness = self._data.default_fixed_tendon_limit_stiffness.clone()
+        #    self._data.fixed_tendon_pos_limits = self._data.default_fixed_tendon_pos_limits.clone()
+        #    self._data.fixed_tendon_rest_length = self._data.default_fixed_tendon_rest_length.clone()
+        #    self._data.fixed_tendon_offset = self._data.default_fixed_tendon_offset.clone()
+        #    self._data.spatial_tendon_stiffness = self._data.default_spatial_tendon_stiffness.clone()
+        #    self._data.spatial_tendon_damping = self._data.default_spatial_tendon_damping.clone()
+           # self._data.spatial_tendon_limit_stiffness = self._data.default_spatial_tendon_limit_stiffness.clone()
+           self._data.spatial_tendon_offset = self._data.default_spatial_tendon_offset.clone()
 
     def _apply_actuator_model(self):
         """Processes joint commands for the articulation by forwarding them to the actuators.
@@ -1762,8 +1829,38 @@ class Articulation(AssetBase):
         if self.num_fixed_tendons > 0:
             raise NotImplementedError("Tendons are not implemented yet")
 
-        # if self.num_spatial_tendons > 0:
-        #     raise NotImplementedError("Tendons are not implemented yet")
+        if self.num_spatial_tendons > 0:
+            pass
+            # -- gains
+            # st_stiffnesses = self.root_physx_view.get_spatial_tendon_stiffnesses()[0].tolist()
+            # st_dampings = self.root_physx_view.get_spatial_tendon_dampings()[0].tolist()
+            # # -- limits
+            # st_limit_stiffnesses = self.root_physx_view.get_spatial_tendon_limit_stiffnesses()[0].tolist()
+            # st_offsets = self.root_physx_view.get_spatial_tendon_offsets()[0].tolist()
+            # # create table for term information
+            # tendon_table = PrettyTable()
+            # tendon_table.title = f"Simulation Spatial Tendon Information (Prim path: {self.cfg.prim_path})"
+            # tendon_table.field_names = [
+            #     "Index",
+            #     "Stiffness",
+            #     "Damping",
+            #     "Limit Stiffness",
+            #     "Offset",
+            # ]
+            # tendon_table.float_format = ".3"
+            # # add info on each term
+            # for index in range(self.num_spatial_tendons):
+            #     tendon_table.add_row([
+            #         index,
+            #         st_stiffnesses[index],
+            #         st_dampings[index],
+            #         st_limit_stiffnesses[index],
+            #         st_offsets[index],
+            #     ])
+            # # convert table to string
+            # omni.log.info(
+            #     f"Simulation parameters for spatial tendons in {self.cfg.prim_path}:\n" + tendon_table.get_string()
+            # )
 
     """
     Deprecated methods.

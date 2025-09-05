@@ -29,7 +29,7 @@ parser.add_argument(
     "--distributed", action="store_true", default=False, help="Run training with multiple GPUs or nodes."
 )
 parser.add_argument("--checkpoint", type=str, default=None, help="Path to model checkpoint to resume training.")
-parser.add_argument("--max_iterations", type=int, default=None, help="RL Policy training iterations.")
+parser.add_argument("--max_iterations", type=int, default=100, help="RL Policy training iterations.")
 parser.add_argument(
     "--ml_framework",
     type=str,
@@ -189,7 +189,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg, agent_cfg: dict):
 
     # run training
     runner.run()
-
+    while simulation_app.is_running():
+        simulation_app.update()
     # close the simulator
     env.close()
 

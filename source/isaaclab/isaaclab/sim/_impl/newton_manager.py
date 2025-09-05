@@ -445,3 +445,4 @@ class NewtonManager:
             verbose=verbose,
         )
         NewtonManager._report_contacts = True
+        return contact_sensor

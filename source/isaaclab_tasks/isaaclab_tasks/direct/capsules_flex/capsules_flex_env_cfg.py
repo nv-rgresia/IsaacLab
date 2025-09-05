@@ -18,8 +18,8 @@ class CapsulesFlexEnvCfg(DirectRLEnvCfg):
     decimation = 2
     episode_length_s = 5.0
     # - spaces definition
-    action_space = 1
-    observation_space = 2
+    action_space = 5
+    observation_space = 15
     state_space = 0
     rew_scale_alive = 1.0
     rew_scale_terminated = -2.0
@@ -31,7 +31,7 @@ class CapsulesFlexEnvCfg(DirectRLEnvCfg):
     sim: SimulationCfg = SimulationCfg(dt=1 / 120, render_interval=decimation)
 
     # robot(s)
-    robot_cfg: ArticulationCfg = CAPSULES_CFG.replace(prim_path="/World/envs/env_.*/Robot")
+    robot_cfg: ArticulationCfg = CAPSULES_CFG.replace(prim_path="/World/envs/env_.*/shadow_hand")
     # object_cfg: RigidObjectCfg = RigidObjectCfg(
     #     prim_path="/World/envs/env_.*/object",
     #     spawn=sim_utils.UsdFileCfg(

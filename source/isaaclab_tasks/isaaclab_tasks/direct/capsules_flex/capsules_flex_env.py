@@ -51,13 +51,18 @@ class CapsulesFlexEnv(DirectRLEnv):
 
     def _apply_action(self) -> None:
         self.robot.set_spatial_tendon_offset(self.actions)
-        # self.robot.write_spatial_tendon_properties_to_sim()
+        self.robot.write_spatial_tendon_properties_to_sim()
 
     def _get_observations(self) -> dict:
         obs = torch.cat(
             (
                 self.joint_pos[:, 0].unsqueeze(dim=1),
+                self.joint_pos[:, 1].unsqueeze(dim=1),
+                self.joint_pos[:, 2].unsqueeze(dim=1),
+                self.joint_pos[:, 3].unsqueeze(dim=1),
+                self.joint_pos[:, 4].unsqueeze(dim=1),
                 self.joint_vel[:, 0].unsqueeze(dim=1),
+                self.joint_vel[:, 1].unsqueeze(dim=1),
             ),
             dim=-1,
         )
