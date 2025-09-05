@@ -13,13 +13,13 @@ from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
 @configclass
-class CapsulesFlexEnvCfg(DirectRLEnvCfg):
+class FingerFlexEnvCfg(DirectRLEnvCfg):
     # env
     decimation = 2
     episode_length_s = 5.0
-    # - spaces definition
-    action_space = 5
-    observation_space = 15
+    # - spaces definition, 28 spatial tendon actuators on shadow hand
+    action_space = 28
+    observation_space = 7
     state_space = 0
     rew_scale_alive = 1.0
     rew_scale_terminated = -2.0
@@ -31,24 +31,6 @@ class CapsulesFlexEnvCfg(DirectRLEnvCfg):
     sim: SimulationCfg = SimulationCfg(dt=1 / 120, render_interval=decimation)
 
     # robot(s)
-    robot_cfg: ArticulationCfg = CAPSULES_CFG.replace(prim_path="/World/envs/env_.*/shadow_hand")
-    # object_cfg: RigidObjectCfg = RigidObjectCfg(
-    #     prim_path="/World/envs/env_.*/object",
-    #     spawn=sim_utils.UsdFileCfg(
-    #         usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-    #         rigid_props=sim_utils.RigidBodyPropertiesCfg(
-    #             kinematic_enabled=False,
-    #             disable_gravity=False,
-    #             enable_gyroscopic_forces=True,
-    #             solver_position_iteration_count=8,
-    #             solver_velocity_iteration_count=0,
-    #             sleep_threshold=0.005,
-    #             stabilization_threshold=0.0025,
-    #             max_depenetration_velocity=1000.0,
-    #         ),
-    #         mass_props=sim_utils.MassPropertiesCfg(density=567.0),
-    #     ),
-    #     init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, -0.39, 0.6), rot=(1.0, 0.0, 0.0, 0.0)),
-    # )
-    # scene
+    robot_cfg: ArticulationCfg = SPATIAL_HAND_CFG.replace(prim_path="/World/envs/env_.*/shadow_hand")
+
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=4.0, replicate_physics=True)

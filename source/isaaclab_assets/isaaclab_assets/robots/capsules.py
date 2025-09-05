@@ -26,7 +26,8 @@ from isaaclab.actuators.actuator_cfg import ImplicitActuatorCfg
 
 CAPSULES_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=f"/home/rgresia/Repositories/sim-tested-hands/il-shadow-hand-spatial-ff.usd",
+        #usd_path=f"/home/rgresia/Repositories/sim-tested-hands/il-shadow-hand-spatial-ff.usd",
+        usd_path=f"/home/rgresia/Repositories/sim-tested-hands/shadow-hand-spatial-tendons.usda",
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
         ),
