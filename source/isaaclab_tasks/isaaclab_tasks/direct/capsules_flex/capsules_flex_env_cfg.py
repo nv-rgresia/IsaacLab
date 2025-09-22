@@ -13,7 +13,7 @@ from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
 @configclass
-class FingerFlexEnvCfg(DirectRLEnvCfg):
+class CapsulesFlexEnvCfg(DirectRLEnvCfg):
     # env
     decimation = 2
     episode_length_s = 5.0
@@ -31,6 +31,6 @@ class FingerFlexEnvCfg(DirectRLEnvCfg):
     sim: SimulationCfg = SimulationCfg(dt=1 / 120, render_interval=decimation)
 
     # robot(s)
-    robot_cfg: ArticulationCfg = SPATIAL_HAND_CFG.replace(prim_path="/World/envs/env_.*/shadow_hand")
+    robot_cfg: ArticulationCfg = CAPSULES_CFG.replace(prim_path="/World/envs/env_.*/shadow_hand")
 
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=4.0, replicate_physics=True)

@@ -209,6 +209,7 @@ class Articulation(AssetBase):
         self._apply_actuator_model()
         # write actions into simulation
         self._root_newton_view.set_attribute("joint_f", NewtonManager.get_control(), self._joint_effort_target_sim)
+        self.write_spatial_tendon_properties_to_sim()
         # position and velocity targets only for implicit actuators
         if self._has_implicit_actuators:
             # Sets the position or velocity target for the implicit actuators depending on the actuator type.
@@ -1654,7 +1655,7 @@ class Articulation(AssetBase):
         self._fixed_tendon_names = list()
         self._spatial_tendon_names = self._root_newton_view.tendon_names
         # parse fixed tendons properties if they exist
-        if self.num_fixed_tendons > 0 or self.num_spatial_tendons > 0:
+        if self.num_spatial_tendons > 0:
         #    stage = stage_utils.get_current_stage()
         #    joint_paths = self.root_physx_view.dof_paths[0]
 
