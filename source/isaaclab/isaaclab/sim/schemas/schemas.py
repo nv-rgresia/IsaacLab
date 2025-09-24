@@ -762,9 +762,6 @@ def modify_spatial_tendon_properties(
         if "PhysxTendonAttachmentRootAPI" in schema_name:
             instance_name = schema_name.split(":")[-1]
             physx_tendon_spatial_api = PhysxSchema.PhysxTendonAttachmentRootAPI(tendon_prim, instance_name)
-        elif "PhysxTendonAttachmentLeafAPI" in schema_name:
-            instance_name = schema_name.split(":")[-1]
-            physx_tendon_spatial_api = PhysxSchema.PhysxTendonAttachmentLeafAPI(tendon_prim, instance_name)
         else:
             continue
         # convert to dict
