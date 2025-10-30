@@ -35,10 +35,10 @@ class MJWarpSolverCfg(NewtonSolverCfg):
     solver_type: str = "mujoco_warp"
     """Solver type. Can be "mujoco_warp"."""
 
-    nefc_per_env: int = 300
+    njmax: int = 300
     """Number of constraints per environment (world)."""
 
-    ncon_per_env: int | None = None
+    nconmax: int | None = None
     """Number of contact points per environment (world)."""
 
     iterations: int = 100
@@ -161,6 +161,9 @@ class FeatherstoneSolverCfg(NewtonSolverCfg):
 
     See: https://en.wikipedia.org/wiki/Semi-implicit_Euler_method
     """
+
+    solver_type: str = "featherstone"
+    """Solver type. Can be "featherstone"."""
 
     angular_damping: float = 0.05
     """Angular damping parameter for rigid contact simulation."""

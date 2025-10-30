@@ -50,9 +50,7 @@ class ArticulationData:
         self._sim_timestamp = 0.0
 
         # obtain global simulation view
-        gravity = NewtonManager.get_model().gravity
-        # Convert to direction vector
-        gravity_dir = torch.tensor((gravity[0], gravity[1], gravity[2]), device=self.device)
+        gravity_dir = wp.to_torch(NewtonManager.get_model().gravity)
         gravity_dir = math_utils.normalize(gravity_dir.unsqueeze(0)).squeeze(0)
 
         # Initialize constants
@@ -491,13 +489,13 @@ class ArticulationData:
         relative to the world.
         """
         if self._root_com_vel_w.timestamp < self._sim_timestamp:
-            # Newton reads velocities as [wx, wy, wz, vx, vy, vz] Isaac reads as [vx, vy, vz, wx, wy, wz]
+            # Newton and Isaac: [vx, vy, vz, wx, wy, wz]
             velocity = self._root_newton_view.get_root_velocities(NewtonManager.get_state_0())
             if velocity is None:
                 velocity = torch.zeros((self._root_newton_view.count, 6), device=self.device)
             else:
                 velocity = wp.to_torch(velocity).clone()
-            self._root_com_vel_w.data = torch.cat((velocity[:, 3:], velocity[:, :3]), dim=-1)
+            self._root_com_vel_w.data = velocity
             self._root_com_vel_w.timestamp = self._sim_timestamp
 
         return self._root_com_vel_w.data

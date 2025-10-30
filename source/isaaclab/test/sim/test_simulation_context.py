@@ -135,8 +135,7 @@ def test_zero_gravity():
     """Test that gravity can be properly disabled."""
     cfg = SimulationCfg(gravity=(0.0, 0.0, 0.0))
 
-    sim = SimulationContext(cfg)
+    SimulationContext(cfg)
 
-    gravity_dir, gravity_mag = sim.get_physics_context().get_gravity()
-    gravity = np.array(gravity_dir) * gravity_mag
+    gravity = np.array(NewtonManager._gravity_vector)
     np.testing.assert_almost_equal(gravity, cfg.gravity)

@@ -48,7 +48,7 @@ SOLVER_CFGs = {
         dt=0.005,
         newton_cfg=NewtonCfg(
             solver_cfg=MJWarpSolverCfg(
-                nefc_per_env=80,
+                njmax=80,
                 ls_parallel=True,
                 ls_iterations=20,
                 cone="elliptic",
@@ -225,15 +225,15 @@ def sim(request):
     else:
         add_ground_plane = False  # default to no ground plane
     if "sim_cfg" in request.fixturenames:
-        cfg: SimulationCfg = request.getfixturevalue("sim_cfg")
+        sim_cfg = request.getfixturevalue("sim_cfg")
     else:
-        cfg = None
+        sim_cfg = SOLVER_CFGs["anymal"]
     with build_simulation_context(
         device=device,
         auto_add_lighting=True,
         gravity_enabled=gravity_enabled,
         add_ground_plane=add_ground_plane,
-        sim_cfg=cfg,
+        sim_cfg=sim_cfg,
     ) as sim:
         sim._app_control_on_stop_handle = None
         yield sim
@@ -768,7 +768,6 @@ def test_external_force_on_single_body(sim, num_articulations, device, add_groun
     for _ in range(5):
         # reset root state
         root_state = articulation.data.default_root_state.clone()
-        print("root_state", root_state)
         articulation.write_root_pose_to_sim(root_state[:, :7])
         articulation.write_root_velocity_to_sim(root_state[:, 7:])
         # reset dof state
@@ -792,7 +791,6 @@ def test_external_force_on_single_body(sim, num_articulations, device, add_groun
             sim.step()
             # update buffers
             articulation.update(sim.cfg.dt)
-            print("root_pos_w", articulation.data.root_pos_w[:, 1])
         # check condition that the articulations have fallen down
         for i in range(num_articulations):
             assert articulation.data.root_pos_w[i, 1].item() > 1.5
@@ -856,7 +854,7 @@ def test_external_force_on_multiple_bodies(sim, num_articulations, device, add_g
         # check condition
         for i in range(num_articulations):
             # since there is a moment applied on the articulation, the articulation should rotate
-            assert articulation.data.root_ang_vel_w[i, 2].item() > 0.1
+            assert articulation.data.root_ang_vel_w[i, 2].item() < -1.0
 
 
 @pytest.mark.skip(reason="Newton Alpha currently fails to load gains from USD file.")
